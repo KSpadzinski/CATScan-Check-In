@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>CATScan Check-In</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link href="Content/bootstrap.min.css" rel="stylesheet" />
+    <link href="Content/bootstrap-responsive.min.css" rel="stylesheet" />
+    <link href="Content/font-awesome.min.css" rel="stylesheet" />
+    <link href="Content/app.css" rel="stylesheet" />
+
+</head>
+
+<body>
+
+    <!-- Top Menu Bar -->
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="navbar-inner">
+            <div class="container">
+                <ul class="nav">
+                    <li class="active"><a class="brand" href="#">CATScan Check-In</a></li>
+                </ul>
+                <ul class="nav pull-right">
+                    <li>
+                        <img id="loadingModal" data-backdrop="static" class="modal hide" style="background: transparent; width: 25px; position: relative; margin-right: 20px; top: 10px;" tabindex="-1" role="dialog"  aria-hidden="true" src="img/spinner.gif" />
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login : Shows when user isn't authenticated" -->
+    <div class="container" id="pnlNotAuthenticated" style="display: block;" style="display: none;">
+        <div class="hero-unit">
+            <div id="pnlSignIn" style="display: block;">
+                <input class="span2" type="text" placeholder="Username or Email"
+                    id="txtEmail">
+                <input class="span2" type="password" placeholder="Password" id="txtPassword">
+                <button href="#" class="btn btn-inverse" id="btnSignIn" type="button">Sign in</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application : Available When Authenticated -->
+    <div class="container tabbable" id="pnlAuthenticated" style="display: none;">
+	    <!-- Alert Holder -->
+        <div class="row" id="alert">
+            <div id="alert_placeholder" class="span12"></div>
+        </div> 
+        
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" style="margin-top: -10px;" id="appTabs">
+            <li class="active"><a href="#scan" data-toggle="tab"><i class="icon-qrcode"></i>&nbsp;Scan</a></li>
+            <li><a href="#settings" data-toggle="tab"><i class="icon-cog"></i>&nbsp;Settings</a></li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="row tab-content" style="margin-top: -10px; padding: 5px;">
+            <!-- Scan Tab -->
+            <div class="row tab-pane active" id="scan">
+                <div class="row">
+                    <div class="span12"><strong>Step One:</strong> Scan / Enter QR Code</div>
+                </div>
+                <div class="row">
+                    <div class="span12">
+                        <div class="control-group" id="cgMaterialPartNumber">
+                            <div class="controls input-append">
+                                <input type="text" id="txtQRCode" placeholder="QR Code" style="width: 125px;">
+                                <button id="btnQRCodeClear" class="btn" type="button"><i class="icon-remove-sign"></i></button>
+                                <button id="btnQRCodeScan" class="btn btn-inverse" type="button"><i class="icon-qrcode"></i>&nbsp;Scan</button>
+                                
+                            </div>
+                            <div id="scanResultMessage">&nbsp;</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="pnlCheckIn" class="row" style="display: none;">
+                    <div class="span12">
+                        <div class="row" style="margin-bottom: 5px;">
+                            <div class="span12"><strong>Step Two:</strong> Complete Check-In</div>
+                        </div>
+                        <div class="row">
+                            <div class="span12">
+                                <div class="btn-group" data-toggle="buttons-radio">
+                                    <button id="btnStatus2" status="2" type="button" class="btn btn-success">
+                                        Ready</button>
+                                    <button id="btnStatus3" status="3" type="button " class="btn btn-danger">
+                                        Shop</button>
+                                    <button id="btnStatus4" status="4" type="button " class="btn btn-warning">
+                                        Attention</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 10px;">
+                            <div class="span12">
+                                <textarea class="field span12" id="txtNote" placeholder="Add A Note" rows="2"></textarea>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="span12">
+                                <button id="btnCapturePhoto" class="btn btn-inverse" type="button"><i class="icon-camera icon-white"></i> Add</button>
+                                <button id="btnConfirmAssociation" class="btn btn-inverse" data-confirm="Are you sure you want to update the status of this equipment or attachment?" type="button"><i class="icon-refresh icon-white"></i> Update</button>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 10px;">
+                            <div class="span12">
+                                <div id="pictureContainer"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div class="row tab-pane" id="settings">
+                <div class="span12">
+                    <button href="#" class="btn btn-inverse" id="btnSignOut" type="button">Sign Out</button>
+                </div>
+                <div class="span12">
+                	<span id="lblVersion" style="margin-top: 10px;"></span>
+                </div>
+            </div>
+        </div>
+    </div>  
+
+    <!-- /container -->
+     <!-- Le javascript
+	================================================== -->
+	<!-- Le javascript
+	================================================== -->
+	<!-- Placed at the end of the document so the pages load faster -->
+    <script src="Scripts/jquery.min.js"></script>
+    <script src="Scripts/bootstrap.min.js"></script>
+	<script src="phonegap.js"></script>
+	<script src="barcodescanner.js"></script>
+	<script src="js/jQuery.plugin.jStorage.js"></script>
+    <script src="js/parseUrl.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/login.js"></script>
+    <script src="js/fastclick.js"></script>
+    <script src="js/camera.js"></script>
+    <script>
+        var Latitude;
+        var Longitude; 
+        var Model;
+        var SerialNumber;
+        var EquipManufCode;
+        var QRID;
+        var Status = 1;
+        var AssociationMessage = "";
+        var scanner;
+
+	    $(document).ready(function () {
+	        /* Phonegap BarcodeScanner Plugin */
+try {
+scanner = cordova.require("cordova/plugin/BarcodeScanner");
+}
+catch(e) {
+bootstrap_alert.warning("Scanner was not started.  Barcode scanning not available.");
+}
+	        
+            /**** Get Authentication Token from localStorage : If it doesn't exist show the login form and hide the app ************/
+            var token = $.jStorage.get("xToken");
+            if(token) {
+                $("#pnlNotAuthenticated").hide();
+                $("#pnlAuthenticated").show();
+            }
+            else {
+                $("#pnlNotAuthenticated").show();
+                $("#pnlAuthenticated").hide();
+            }
+
+	        function scanBarcode(scanType) {
+                var url = "";
+                if($("#txtQRCode").val()=='')   {
+
+	            scanner.scan(function (result) {
+	                if (result.cancelled == 1) {
+	                    bootstrap_alert.warning("Scan was cancelled");
+	                    return false;
+	                }
+	                else {
+	                    url = result.text;
+	                    var sUrl = parseUri(url);               
+                        var qrid = sUrl.queryKey['qrid'];
+
+                        if(qrid) {
+                            url = "http://m.mytoromont.com/index.html?qrid=" + qrid;
+                            $("#txtQRCode").val(qrid);
+                            QRID = $("#txtQRCode").val();
+                            checkBarcode(url);
+                            }
+                        else
+                            return false;
+
+	                }
+	            }, function (error) {
+	                bootstrap_alert.warning("Scanning failed: " + error);
+	                return false;
+	            }
+				);
+
+                }
+                else {
+                    url = "http://m.mytoromont.com/index.html?qrid=" + $("#txtQRCode").val();
+                    QRID = $("#txtQRCode").val();
+                    checkBarcode(url);
+                }
+                
+                
+            }
+
+
+            function checkBarcode(url) {
+            	navigator.geolocation.getCurrentPosition(handle_geolocation_query, handle_errors, {enableHighAccuracy: true});
+                
+                $('#loadingModal').modal('show');
+                $.ajax({
+                url: 'http://ws.toromont.ca/touch/Equip/QRCode/equip',
+                data: { QRURL: escape(url) },
+                timeout: 15000,
+                dataType: 'jsonp',
+                crossDomain: true,
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("AuthX", "WRAP access_token=123");
+                    }
+                })
+                .done(function (data) {
+                    if (data.HttpStatusCode) {
+                        $("#scanResultMessage").html("QR Code <b>" + QRID + "</b> has not been associated.  Please scan another QR Code.");
+                        $("#pnlCheckIn").hide();
+                    }
+                    else {
+                       $("#scanResultMessage").html("You have scanned a " + data.DisplayModel + "(" + data.SerialNumber + "). Your current location is Lat: " + Latitude + " and Lon: " + Longitude);
+                       $("#pnlCheckIn").show();
+                    }
+                })
+                .fail(function (data) {
+                   bootstrap_alert.error('There has been a problem retrieving data.');
+                   $("#pnlCheckIn").hide();
+                })
+                .always(function () {
+                   $('#loadingModal').modal('hide');
+                });
+            }
+
+			 $('#btnQRCodeScan').click(function () {
+                scanBarcode(1);
+	        });
+
+            /* Capture Photo */
+	        $('#btnCapturePhoto').click(function () {
+                capturePhoto();
+	        });
+
+             /* Get Status */
+	        $(document).on('click', '#btnStatus2, #btnStatus3, #btnStatus4', function () {
+	        	$('#btnStatus2').text('Ready');
+                $('#btnStatus3').text('Shop');
+                $('#btnStatus4').text('Attention');
+                Status = $(this).attr('status');
+                $(this).html('<i class="icon-check icon-white"></i>&nbsp;' + $(this).text());
+            });
+
+            /* Clear Form */
+            $('#btnQRCodeClear').click(function () {
+                resetAll();
+            });
+
+            /*** Transmit Data *****************************************/
+	        $(document).on('click', '#dataConfirmOK', function () {
+               $('#loadingModal').modal('show')
+               var Note = $("#txtNote").val();
+               
+                $.ajax({
+                    url: 'http://ws.toromont.ca/touch/Equip/QRCode/UpdateEquipment?',
+                    dataType: "jsonp",
+                    timeout: 15000,
+                    data: {
+                        qrid: QRID,
+                        status: Status,
+                        note: Note,
+                        lat: Latitude,
+                        long: Longitude
+                    },
+                    crossDomain: true,
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("AuthX", "WRAP access_token=" + token);
+                    }
+                })
+                .done(function (data) {
+                    if(data.HttpStatusCode) {
+                        bootstrap_alert.warning(data.Message);
+                    }
+                    else {
+                        AssociationMessage += "Status Update<br/>";
+                        AssociationMessage += "Location Update<br/>";
+                        if(pictureFiles.length > 0)
+                            uploadPhotos(QRID, 'Image' + QRID, 'checkin');
+                        }
+                 })
+                .fail(function (data) {
+                    bootstrap_alert.error('There has been a problem checking in this equipment.  Please try again.');
+                })
+                .always(function () {
+                    if(pictureFiles.length == 0) {
+                        resetAll();
+                        $('#loadingModal').modal('hide');
+                        }
+                });
+                
+	        });
+
+
+            /*** Login / Logout Functions ****************************************************/
+	        $("#btnSignIn").click(function () {
+
+                var sec = new TIH.ToromontCAT.Web.Security("http://ws.toromont.ca/touch");
+                    var loginName = $("#txtEmail").val();
+                    var password = $("#txtPassword").val();
+
+                    var user = new Object();
+                    user.UserName = loginName;
+                    user.Password = password;
+                    sec.Login(user);
+
+            });
+
+            $('#btnSignOut').click(function () {
+            	alert('sign out');
+                var sec = new TIH.ToromontCAT.Web.Security("http://ws.toromont.ca/touch");
+				sec.ClearLogin();
+            });
+            
+            $.get("config.xml", function(data){
+			    $('#lblVersion').text('CATScan Check-In Version ' + $(data).find('widget').attr('version'));
+			});
+
+
+	        $('button[data-confirm]').click(function (ev) {
+	            if (!$('#dataConfirmModal').length) {
+	                $('body').append('<div id="dataConfirmModal" class="modal" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button><h3 id="dataConfirmLabel">Please Confirm</h3></div><div class="modal-body"></div><div class="modal-footer"><button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button><button class="btn btn-primary"  data-dismiss="modal" id="dataConfirmOK" type="button">OK</button></div></div>');
+	            }
+	            $('#dataConfirmModal').find('.modal-body').text($(this).attr('data-confirm'));
+	            $('#dataConfirmModal').modal({ show: true });
+	            return false;
+	        });
+
+          
+	        
+	    });	
+
+
+/* Alerts */
+	        bootstrap_alert = function () { }
+	        bootstrap_alert.warning = function (message) { $('#alert_placeholder').append('<div class="alert alert-block"><a class="close" href="#" data-dismiss="alert">×</a><span>' + message + '</span></div>');} //.fadeIn().delay(3000).fadeOut('slow'); }
+	        bootstrap_alert.success = function (message) { $('#alert_placeholder').append('<div class="alert alert-block alert-success"><a class="close" href="#" data-dismiss="alert">×</a><span>' + message + '</span></div>');} //.fadeIn().delay(3000).fadeOut('slow'); }
+	        bootstrap_alert.error = function (message) { $('#alert_placeholder').append('<div class="alert alert-block alert-error"><a class="close"href="#" data-dismiss="alert">×</a><span>' + message + '</span></div>');} //.fadeIn().delay(3000).fadeOut('slow'); }
+	        bootstrap_alert.info = function (message) { $('#alert_placeholder').append('<div class="alert alert-block alert-info"><a class="close" href="#" data-dismiss="alert">×</a><span>' + message + '</span></div>');} //.fadeIn().delay(3000).fadeOut('slow'); }
+        
+       
+
+            function handle_errors(error) {
+                switch (error.code) {
+                    case error.PERMISSION_DENIED: bootstrap_alert.error("user did not share geolocation data");
+                        break;
+                    case error.POSITION_UNAVAILABLE: bootstrap_alert.error("could not detect current position");
+                        break;
+                    case error.TIMEOUT: bootstrap_alert.error("retrieving position timed out");
+                        break;
+                    default: bootstrap_alert.error("unknown GPS error");
+                        break;
+                }
+            }
+            function handle_geolocation_query(position) {
+                Latitude = position.coords.latitude;
+                Longitude = position.coords.longitude;
+            }
+	      
+            function resetAll()  {
+                $("#txtQRCode").val('');
+                $("#scanResultMessage").html("&nbsp;");
+                $("#txtNote").val('');
+                $("#pnlCheckIn").hide();
+                $("#lblStatus").text('');
+                EquipManufCode = "";
+                SerialNumber = "";
+                QRID = "";
+                Model = "";
+                Status = "";
+                AssociationMessage = "";
+                pictureFiles = [];
+                totalImages = 0;
+                imageProgressCount = 0;
+                $('#pictureContainer').html('');
+                $('#btnStatus2, #btnStatus3, #btnStatus4').removeClass('active');
+                $('#btnStatus2').text('Ready');
+                $('#btnStatus3').text('Shop');
+                $('#btnStatus4').text('Attention');
+            }
+
+          function endAssociation() {
+            $('#loadingModal').modal('hide');
+            bootstrap_alert.info(AssociationMessage);
+            
+            resetAll();
+        }
+
+    </script>
+
+</body>
+</html>
